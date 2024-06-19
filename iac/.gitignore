@@ -1,0 +1,9 @@
+*.tfstate
+*.tfstate.*
+
+*.tfplan
+*.lock.hcl
+
+**/.terraform/*
+
+/bin
