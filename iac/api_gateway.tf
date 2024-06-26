@@ -40,19 +40,19 @@ resource "aws_lambda_permission" "apigw" {
 resource "aws_api_gateway_resource" "resource_buscarviaje" {
   rest_api_id = aws_api_gateway_rest_api.myapi.id
   parent_id   = aws_api_gateway_rest_api.myapi.root_resource_id
-  path_part   = "buscarviaje"
+  path_part   = "buscar-viaje"
 }
 
 resource "aws_api_gateway_resource" "resource_publicarviaje1" {
   rest_api_id = aws_api_gateway_rest_api.myapi.id
   parent_id   = aws_api_gateway_rest_api.myapi.root_resource_id
-  path_part   = "publicarviaje1"
+  path_part   = "publicar-viaje"
 }
 
 resource "aws_api_gateway_resource" "resource_publicarviaje2" {
   rest_api_id = aws_api_gateway_rest_api.myapi.id
   parent_id   = aws_api_gateway_rest_api.myapi.root_resource_id
-  path_part   = "publicarviaje2"
+  path_part   = "publicar-viaje2"
 }
 
 # Métodos API Gateway para cada función Lambda

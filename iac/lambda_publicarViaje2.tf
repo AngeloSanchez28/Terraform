@@ -29,6 +29,9 @@ resource "aws_lambda_function" "publicarviaje2" {
 
   environment {
     variables = {
+      VIAJES_TABLE       = "Viajes",
+      VIAJE_DESTINO_TABLE = "ViajeDestino",
+      VIAJE_ORIGEN_TABLE  = "ViajeOrigen",
       "key" = "value"
     }
   }
