@@ -3,5 +3,7 @@
 exports.handler = async (event) => {
     console.log(event)
 
-    return "Hola Ppaus";
+    return {
+        body:"BOTAME TU GAAAAAAAAAA"
+    }
 }

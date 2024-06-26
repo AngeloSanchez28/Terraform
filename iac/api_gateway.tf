@@ -1,126 +1,150 @@
-variable "publicarViaje1_lambda_arn" {
-  description = "ARN for PublicarViaje1 Lambda function"
-  type        = string
+# API Gateway
+resource "aws_api_gateway_rest_api" "myapi" {
+  name        = "MyAPI"
+  description = "My API Gateway"
+}
+#Recurso
+resource "aws_api_gateway_resource" "myresource" {
+  rest_api_id = aws_api_gateway_rest_api.myapi.id
+  parent_id   = aws_api_gateway_rest_api.myapi.root_resource_id
+  path_part   = "test"
+}
+#Metodo
+resource "aws_api_gateway_method" "mymethod" {
+  rest_api_id   = aws_api_gateway_rest_api.myapi.id
+  resource_id   = aws_api_gateway_resource.myresource.id
+  http_method   = "GET"
+  authorization = "NONE"
 }
 
-variable "publicarViaje2_lambda_arn" {
-  description = "ARN for PublicarViaje2 Lambda function"
-  type        = string
+resource "aws_api_gateway_integration" "lambda_integration" {
+  rest_api_id = aws_api_gateway_rest_api.myapi.id
+  resource_id = aws_api_gateway_resource.myresource.id
+  http_method = aws_api_gateway_method.mymethod.http_method
+  integration_http_method = "POST"
+  type = "AWS_PROXY"
+  uri = aws_lambda_function.lambda_main.invoke_arn
 }
 
-variable "buscarViaje_lambda_arn" {
-  description = "ARN for BuscarViaje Lambda function"
-  type        = string
+resource "aws_lambda_permission" "apigw" {
+  statement_id = "AllowAPIGatewayInvoke"
+  action = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.lambda_main.function_name
+  principal = "apigateway.amazonaws.com"
+  source_arn = "${aws_api_gateway_rest_api.myapi.execution_arn}/*/*"
 }
 
-resource "aws_api_gateway_rest_api" "api" {
-  name        = "ViajesAPI"
-  description = "API for viajes microservices"
+###GPT###
+
+# Recursos API Gateway para cada función Lambda
+resource "aws_api_gateway_resource" "resource_buscarviaje" {
+  rest_api_id = aws_api_gateway_rest_api.myapi.id
+  parent_id   = aws_api_gateway_rest_api.myapi.root_resource_id
+  path_part   = "buscarviaje"
 }
 
-# Resource and Method for publicarViaje1
-resource "aws_api_gateway_resource" "publicarViaje1_resource" {
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
-  path_part   = "publicar-viaje1"
+resource "aws_api_gateway_resource" "resource_publicarviaje1" {
+  rest_api_id = aws_api_gateway_rest_api.myapi.id
+  parent_id   = aws_api_gateway_rest_api.myapi.root_resource_id
+  path_part   = "publicarviaje1"
 }
 
-resource "aws_api_gateway_method" "publicarViaje1_post_method" {
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.publicarViaje1_resource.id
+resource "aws_api_gateway_resource" "resource_publicarviaje2" {
+  rest_api_id = aws_api_gateway_rest_api.myapi.id
+  parent_id   = aws_api_gateway_rest_api.myapi.root_resource_id
+  path_part   = "publicarviaje2"
+}
+
+# Métodos API Gateway para cada función Lambda
+resource "aws_api_gateway_method" "post_buscarviaje" {
+  rest_api_id   = aws_api_gateway_rest_api.myapi.id
+  resource_id   = aws_api_gateway_resource.resource_buscarviaje.id
   http_method   = "POST"
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_integration" "publicarViaje1_lambda_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.publicarViaje1_resource.id
-  http_method             = aws_api_gateway_method.publicarViaje1_post_method.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = "arn:aws:apigateway:${var.aws_region}:lambda:path/2015-03-31/functions/${var.publicarViaje1_lambda_arn}/invocations"
-}
-
-# Resource and Method for publicarViaje2
-resource "aws_api_gateway_resource" "publicarViaje2_resource" {
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
-  path_part   = "publicar-viaje2"
-}
-
-resource "aws_api_gateway_method" "publicarViaje2_post_method" {
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.publicarViaje2_resource.id
+resource "aws_api_gateway_method" "post_publicarviaje1" {
+  rest_api_id   = aws_api_gateway_rest_api.myapi.id
+  resource_id   = aws_api_gateway_resource.resource_publicarviaje1.id
   http_method   = "POST"
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_integration" "publicarViaje2_lambda_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.publicarViaje2_resource.id
-  http_method             = aws_api_gateway_method.publicarViaje2_post_method.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = "arn:aws:apigateway:${var.aws_region}:lambda:path/2015-03-31/functions/${var.publicarViaje2_lambda_arn}/invocations"
-}
-
-# Resource and Method for buscarViaje
-resource "aws_api_gateway_resource" "buscarViaje_resource" {
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
-  path_part   = "buscar-viaje"
-}
-
-resource "aws_api_gateway_method" "buscarViaje_post_method" {
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.buscarViaje_resource.id
+resource "aws_api_gateway_method" "post_publicarviaje2" {
+  rest_api_id   = aws_api_gateway_rest_api.myapi.id
+  resource_id   = aws_api_gateway_resource.resource_publicarviaje2.id
   http_method   = "POST"
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_integration" "buscarViaje_lambda_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.buscarViaje_resource.id
-  http_method             = aws_api_gateway_method.buscarViaje_post_method.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = "arn:aws:apigateway:${var.aws_region}:lambda:path/2015-03-31/functions/${var.buscarViaje_lambda_arn}/invocations"
+# Integraciones API Gateway con Lambda
+resource "aws_api_gateway_integration" "lambda_integration_buscarviaje" {
+  rest_api_id              = aws_api_gateway_rest_api.myapi.id
+  resource_id              = aws_api_gateway_resource.resource_buscarviaje.id
+  http_method              = "POST"
+  integration_http_method  = "POST"
+  type                     = "AWS_PROXY"
+  uri                      = aws_lambda_function.buscarviaje.invoke_arn
 }
 
-# Deployment
-resource "aws_api_gateway_deployment" "deployment" {
-  depends_on = [
-    aws_api_gateway_integration.publicarViaje1_lambda_integration,
-    aws_api_gateway_integration.publicarViaje2_lambda_integration,
-    aws_api_gateway_integration.buscarViaje_lambda_integration
-  ]
-  rest_api_id = aws_api_gateway_rest_api.api.id
+resource "aws_api_gateway_integration" "lambda_integration_publicarviaje1" {
+  rest_api_id              = aws_api_gateway_rest_api.myapi.id
+  resource_id              = aws_api_gateway_resource.resource_publicarviaje1.id
+  http_method              = "POST"
+  integration_http_method  = "POST"
+  type                     = "AWS_PROXY"
+  uri                      = aws_lambda_function.publicarviaje1.invoke_arn
+}
+
+resource "aws_api_gateway_integration" "lambda_integration_publicarviaje2" {
+  rest_api_id              = aws_api_gateway_rest_api.myapi.id
+  resource_id              = aws_api_gateway_resource.resource_publicarviaje2.id
+  http_method              = "POST"
+  integration_http_method  = "POST"
+  type                     = "AWS_PROXY"
+  uri                      = aws_lambda_function.publicarviaje2.invoke_arn
+}
+
+# Permiso de Lambda para API Gateway (uno para cada función Lambda)
+resource "aws_lambda_permission" "apigw_buscarviaje" {
+  statement_id  = "AllowAPIGatewayInvokeBuscarViaje"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.buscarviaje.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.myapi.execution_arn}/*/*"
+}
+
+resource "aws_lambda_permission" "apigw_publicarviaje1" {
+  statement_id  = "AllowAPIGatewayInvokePublicarViaje1"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.publicarviaje1.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.myapi.execution_arn}/*/*"
+}
+
+resource "aws_lambda_permission" "apigw_publicarviaje2" {
+  statement_id  = "AllowAPIGatewayInvokePublicarViaje2"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.publicarviaje2.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.myapi.execution_arn}/*/*"
+}
+
+resource "aws_api_gateway_deployment" "mydeployment" {
+  depends_on  = [aws_api_gateway_integration.lambda_integration,
+    aws_api_gateway_integration.lambda_integration_buscarviaje,
+    aws_api_gateway_integration.lambda_integration_publicarviaje1,
+    aws_api_gateway_integration.lambda_integration_publicarviaje2]
+  rest_api_id = aws_api_gateway_rest_api.myapi.id
   stage_name  = "dev"
 }
 
-# Permissions
-resource "aws_lambda_permission" "publicarViaje1_apigw" {
-  statement_id  = "AllowAPIGatewayInvoke"
-  action        = "lambda:InvokeFunction"
-  function_name = var.publicarViaje1_lambda_arn
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.api.execution_arn}/*/*"
+resource "aws_api_gateway_stage" "stage" {
+  stage_name    = "test"
+  rest_api_id   = aws_api_gateway_rest_api.myapi.id
+  deployment_id = aws_api_gateway_deployment.mydeployment.id
+  description   = "Development stage"
+  variables = {
+    key = "value"
+  }
 }
-
-resource "aws_lambda_permission" "publicarViaje2_apigw" {
-  statement_id  = "AllowAPIGatewayInvoke"
-  action        = "lambda:InvokeFunction"
-  function_name = var.publicarViaje2_lambda_arn
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.api.execution_arn}/*/*"
-}
-
-resource "aws_lambda_permission" "buscarViaje_apigw" {
-  statement_id  = "AllowAPIGatewayInvoke"
-  action        = "lambda:InvokeFunction"
-  function_name = var.buscarViaje_lambda_arn
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.api.execution_arn}/*/*"
-}
-
-

@@ -34,7 +34,7 @@ resource "aws_lambda_function" "lambda_main" {
 
   environment {
     variables = {
-      "key1" = "value"
+      "key" = "value"
     }
   }
 }

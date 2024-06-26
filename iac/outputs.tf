@@ -1,16 +1,21 @@
-output "publicarViaje1_lambda_arn" {
-  value = var.publicarViaje1_lambda_arn
+# Output para el ARN del rol IAM utilizado por las funciones Lambda
+output "aws_iam_role_arn" {
+  value       = aws_iam_role.iam_for_lambda.arn
+  description = "ARN of the IAM role used by the Lambda functions"
 }
 
-output "publicarViaje2_lambda_arn" {
-  value = var.publicarViaje2_lambda_arn
+# Outputs para las funciones Lambda
+output "lambda_buscarViaje_arn" {
+  value       = aws_lambda_function.buscarviaje.arn
+  description = "ARN of the buscarViaje Lambda function"
 }
 
-output "buscarViaje_lambda_arn" {
-  value = var.buscarViaje_lambda_arn
+output "lambda_publicarViaje1_arn" {
+  value       = aws_lambda_function.publicarviaje1.arn
+  description = "ARN of the publicarViaje1 Lambda function"
 }
 
-output "api_invoke_url" {
-  value = aws_api_gateway_deployment.deployment.invoke_url
+output "lambda_publicarViaje2_arn" {
+  value       = aws_lambda_function.publicarviaje2.arn
+  description = "ARN of the publicarViaje2 Lambda function"
 }
-
