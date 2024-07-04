@@ -1,0 +1,65 @@
+name: Deploy and Configure EC2
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    env:
+      TF_VAR_aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      TF_VAR_aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      TF_VAR_ec2_ssh_public_key: ${{ secrets.EC2_SSH_PUBLIC_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.8.5
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./iac
+
+      - name: Terraform Plan
+        run: terraform plan
+        working-directory: ./iac
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        working-directory: ./iac
+
+      - name: Check Terraform State
+        run: terraform show
+        working-directory: ./iac
+
+      - name: Fetch EC2 instance IP
+        id: ec2_ip
+        run: |
+          INSTANCE_IP=$(terraform output -raw instance_ip | head -n 1)
+          echo "Fetched IP: $INSTANCE_IP"
+          echo "INSTANCE_IP=$INSTANCE_IP" >> $GITHUB_ENV
+        working-directory: ./iac
+        shell: bash
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: SSH and run commands
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_KEY }} ubuntu@${{ env.INSTANCE_IP }} << 'EOF'
+            cd /path/to/your/project
+            git fetch --all
+            git reset --hard origin/main
+            docker-compose down
+            docker-compose up -d --build
+          EOF
+        shell: bash
