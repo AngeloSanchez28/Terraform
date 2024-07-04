@@ -2,7 +2,7 @@
 resource "aws_api_gateway_rest_api" "myapi" {
   name        = "MyAPI"
   description = "My API Gateway"
-}
+} 
 #Recurso
 resource "aws_api_gateway_resource" "myresource" {
   rest_api_id = aws_api_gateway_rest_api.myapi.id
