@@ -39,15 +39,6 @@ jobs:
         run: terraform show
         working-directory: ./iac
 
-      - name: Fetch EC2 instance IP
-        id: ec2_ip
-        run: |
-          INSTANCE_IP=$(terraform output -raw instance_ip | head -n 1)
-          echo "Fetched IP: $INSTANCE_IP"
-          echo "INSTANCE_IP=$INSTANCE_IP" >> $GITHUB_ENV
-        working-directory: ./iac
-        shell: bash
-
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
